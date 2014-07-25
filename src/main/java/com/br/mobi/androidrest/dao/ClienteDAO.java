@@ -71,14 +71,13 @@ public class ClienteDAO extends ConnectionFactory {
                     sucesso = stmt.executeUpdate();
                 }else  throw new ComplexityException("A senha deve ter no minímo 6 caracteres.");
 
-
                 if (sucesso > 0) {
                     System.out.println("CLIENTE INSERIDO!");
                 }
 
             } catch (SQLException e) {
                 e.printStackTrace();
-                System.out.println("ERRO AO INSERIR CLIENTE!");
+                throw new NotFoundException("Erro ao inserir o cliente no cadastro");
             } finally {
                 closeConnection(conn, stmt);
             }
@@ -243,6 +242,9 @@ public class ClienteDAO extends ConnectionFactory {
                 cliente.setDataNascimento(resultSet.getString("dataNascimento"));
                 cliente.setTelefone(resultSet.getString("telefone"));
                 listaClientes.add(cliente);
+            }
+            if(cliente == null){
+                throw new NotFoundException("Nome não encontrado no sistema.");
             }
         } catch (SQLException e) {
             e.printStackTrace();

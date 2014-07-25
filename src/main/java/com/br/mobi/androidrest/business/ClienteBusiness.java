@@ -1,6 +1,7 @@
 package com.br.mobi.androidrest.business;
 
 import com.br.mobi.androidrest.dao.ClienteDAO;
+import com.br.mobi.androidrest.exceptions.ComplexityException;
 import com.br.mobi.androidrest.model.Cliente;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -16,7 +17,7 @@ public class ClienteBusiness {
         return clienteDAO.buscarTodos();
     }
 
-    public String inserir(Cliente cliente) {
+    public String inserir(Cliente cliente) throws ComplexityException {
 
         ClienteDAO clienteDAO = new ClienteDAO();
         if(clienteDAO.inserir(cliente) > 0){
@@ -44,7 +45,7 @@ public class ClienteBusiness {
         return clienteDAO.buscarByName(name);
     }
 
-    public String inserirLista(ArrayList<Cliente> listaClientes) {
+    public String inserirLista(ArrayList<Cliente> listaClientes) throws ComplexityException{
         ClienteDAO clienteDAO = new ClienteDAO();
         String retorno = "";
         for (int i = 0; i < listaClientes.size(); i++) {

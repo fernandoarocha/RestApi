@@ -1,6 +1,7 @@
 package com.br.mobi.androidrest.resource;
 
 import com.br.mobi.androidrest.business.ClienteBusiness;
+import com.br.mobi.androidrest.exceptions.ComplexityException;
 import com.br.mobi.androidrest.exceptions.NoContentException;
 import com.br.mobi.androidrest.model.Cliente;
 import com.br.mobi.androidrest.model.Login;
@@ -67,7 +68,7 @@ public class ClienteResource {
     @Path("/inserir")
     @Produces("application/json")
     @Consumes("application/json")
-    public String inserirCliente(Cliente cliente) {
+    public String inserirCliente(Cliente cliente) throws ComplexityException{
         return new ClienteBusiness().inserir(cliente);
     }
 //Espaço em query String é ?%20
@@ -76,7 +77,7 @@ public class ClienteResource {
     @Path("/inserirLista")
     @Produces("application/json")
     @Consumes("application/json")
-    public String inserirLista(String listaClientesJson) {
+    public String inserirLista(String listaClientesJson) throws ComplexityException {
 
         Gson gson = new Gson();
         ArrayList<Cliente> listaClientes = new ArrayList<Cliente>();
