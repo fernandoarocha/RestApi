@@ -1,5 +1,8 @@
 package com.br.mobi.androidrest.dao;
 
+import com.br.mobi.androidrest.exceptions.ComplexityException;
+import com.br.mobi.androidrest.exceptions.InternalServerException;
+import com.br.mobi.androidrest.exceptions.NotFoundException;
 import com.br.mobi.androidrest.exceptions.UnauthorizedException;
 import com.br.mobi.androidrest.factory.ConnectionFactory;
 import com.br.mobi.androidrest.model.Cliente;
@@ -41,7 +44,7 @@ public class ClienteDAO extends ConnectionFactory {
         return id;
     }
 
-    public int inserir(Cliente cliente) {
+    public int inserir(Cliente cliente) throws ComplexityException {
         String passCrypted;
 
         Connection conn = null;
@@ -57,14 +60,17 @@ public class ClienteDAO extends ConnectionFactory {
                 stmt = conn.prepareStatement("INSERT INTO "
                         + "CLIENTE (NOME, EMAIL, PASSWORD, SEXO, DATANASCIMENTO, TELEFONE) VALUES(?,?,?,?,?,?)");
 
-                stmt.setString(1, cliente.getNome());
-                stmt.setString(2, cliente.getEmail());
-                passCrypted = crypto.encryptedPass(cliente.getPassword());
-                stmt.setString(3, passCrypted);
-                stmt.setString(4, cliente.getSexo());
-                stmt.setString(5, cliente.getDataNascimento());
-                stmt.setString(6, cliente.getTelefone());
-                sucesso = stmt.executeUpdate();
+                if(cliente.getPassword().length() > 5){
+                    stmt.setString(1, cliente.getNome());
+                    stmt.setString(2, cliente.getEmail());
+                    passCrypted = crypto.encryptedPass(cliente.getPassword());
+                    stmt.setString(3, passCrypted);
+                    stmt.setString(4, cliente.getSexo());
+                    stmt.setString(5, cliente.getDataNascimento());
+                    stmt.setString(6, cliente.getTelefone());
+                    sucesso = stmt.executeUpdate();
+                }else  throw new ComplexityException("A senha deve ter no minímo 6 caracteres.");
+
 
                 if (sucesso > 0) {
                     System.out.println("CLIENTE INSERIDO!");
@@ -180,14 +186,13 @@ public class ClienteDAO extends ConnectionFactory {
         Cliente cliente = null;
         String passCrypted;
 
-
-
-
         try {
             stmt = conn.prepareStatement("SELECT * FROM CLIENTE WHERE EMAIL = ?");
             stmt.setString(1, username);
+            System.out.println(username);
 
             resultSet = stmt.executeQuery();
+
             while (resultSet.next()) {
                 cliente = new Cliente();
                 cliente.setId(resultSet.getInt("id"));
@@ -197,7 +202,6 @@ public class ClienteDAO extends ConnectionFactory {
                 cliente.setSexo(resultSet.getString("sexo"));
                 cliente.setDataNascimento(resultSet.getString("dataNascimento"));
                 cliente.setTelefone(resultSet.getString("telefone"));
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -205,9 +209,12 @@ public class ClienteDAO extends ConnectionFactory {
             closeConnection(conn, stmt, resultSet);
         }
 
-            if(crypto.checkEncrypted( cliente.getPassword(), password) == true){
-                return cliente;
-            }else throw new UnauthorizedException("Não autorizado, email ou senha incorretos.");
+        if(cliente == null){
+            throw new NotFoundException("Email não encontrado no sistema.");
+        }
+        if(crypto.checkEncrypted( cliente.getPassword(), password) == true){
+            return cliente;
+        }else throw new UnauthorizedException("Não autorizado, email ou senha incorretos.");
     }
 
     public ArrayList<Cliente> buscarByName(String nome) {
